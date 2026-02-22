@@ -1,0 +1,27 @@
+tmp/
+venv/
+env/
+data/
+venv3_new/
+.idea/
+Pentaho-scripts/
+__pycache__/
+*.pyc
+cmd.txt
+tests/temp
+config/data-loader.yml
+config/file-loader.yml
+config/es_loader_*
+config/config.yml
+config/es_loader.yml
+backup/
+
+**/*/__pycache__/*
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+coverage.xml
+*.cover
