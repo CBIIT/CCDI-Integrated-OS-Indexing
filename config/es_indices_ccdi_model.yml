@@ -1,5 +1,6 @@
 # Indices settings
 Indices:
+  # TODO: work on the cypher queries for the index
   - index_name: cohorts
     type: neo4j
     mapping:
@@ -7,16 +8,17 @@ Indices:
         type: keyword
       participant_id:
         type: keyword
-        normalizer: lowercase
       race:
         type: keyword
       sex_at_birth:
         type: keyword
+      consent_group_name:
+        type: keyword
+      consent_group_number:
+        type: keyword
+      study_id:
+        type: keyword
       dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      diagnosis_str:
         type: keyword
       # Diagnosis records
       diagnoses:
@@ -53,6 +55,50 @@ Indices:
           tumor_stage_clinical_n:
             type: keyword
           tumor_stage_clinical_t:
+            type: keyword
+      # Genetic Analysis fields
+      genetic_analyses:
+        type: nested
+        properties:
+          id:
+            type: keyword
+          genetic_analysis_id:
+            type: keyword
+          alteration:
+            type: keyword
+          alteration_effect:
+            type: keyword
+          alteration_type:
+            type: keyword
+          chromosome:
+            type: keyword
+          cytoband:
+            type: keyword
+          exon:
+            type: keyword
+          fusion_partner_exon:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          gene_symbol: # list
+            type: keyword
+          genomic_source_category:
+            type: keyword
+          hgvs_coding:
+            type: keyword
+          hgvs_genome:
+            type: keyword
+          hgvs_protein:
+            type: keyword
+          reference_genome:
+            type: keyword
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          status:
+            type: keyword
+          test:
             type: keyword
       # Survival records
       survivals:
@@ -278,118 +324,60 @@ Indices:
               ELSE []
             END) AS files
         page_size: 100
-  
-  - index_name: genetic_analyses
+
+  #TODO: added genetic_analysis related fields to "sample_diagnosis_genetic_analysis_file_filters"
+  - index_name: study_participants
+    type: neo4j
     mapping:
+      id:
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
+        type: keyword
+      participant_id:
+        type: keyword
+        normalizer: lowercase
+      race:
+        type: keyword
+      sex_at_birth:
+        type: keyword
       # Study fields
+      study_id:
+        type: keyword
       dbgap_accession:
         type: keyword
-      study_id:
+      study_status:
+        type: keyword
+      study_acronym:
         type: keyword
       study_name:
         type: keyword
-      # Participant fields
-      participant_pk:
-        type: keyword
-      participant:
+      # survival filters
+      survival_filters:
         type: nested
         properties:
-          id:
+          last_known_survival_status:
             type: keyword
-          participant_id:
-            type: keyword
-          race: # list
-            type: keyword
-          sex_at_birth:
-            type: keyword
-      # Genetic Analysis fields
-      id:
-        type: keyword
-      genetic_analysis_id:
-        type: keyword
-      alteration:
-        type: keyword
-      cytoband:
-        type: keyword
-      gene_symbol: # for display
-        type: keyword
-      gene_symbol_str: # for sorting
-        type: keyword
-      genomic_source_category:
-        type: keyword
-      hgvs_coding:
-        type: keyword
-      hgvs_genome:
-        type: keyword
-      hgvs_protein:
-        type: keyword
-      reported_significance:
-        type: keyword
-      reported_significance_system:
-        type: keyword
-      status:
-        type: keyword
-      test:
-        type: keyword
-      # Additional Genetic Analysis fields for download
-      alteration_effect:
-        type: keyword
-      alteration_type:
-        type: keyword
-      chromosome:
-        type: keyword
-      exon:
-        type: keyword
-      fusion_partner_exon:
-        type: keyword
-      fusion_partner_gene:
-        type: keyword
-      reference_genome:
-        type: keyword
-      # Diagnosis records
-      diagnoses:
-        type: nested
-        properties:
-          age_at_diagnosis:
-            type: integer
-          anatomic_site:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          diagnosis:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          disease_phase:
-            type: keyword
-      # Survival records
-      survivals:
-        type: nested
-        properties:
           age_at_last_known_survival_status:
             type: integer
           cause_of_death:
             type: keyword
           first_event:
             type: keyword
-          last_known_survival_status:
-            type: keyword
-      # Treatment records
-      treatments:
+      # treatment filters
+      treatment_filters:
         type: nested
         properties:
-          age_at_treatment_end:
-            type: integer
-          age_at_treatment_start:
-            type: integer
-          treatment_agent: # list
-            type: keyword
-          treatment_id:
-            type: keyword
           treatment_type:
             type: keyword
-      # Treatment Response records
-      treatment_responses:
+          treatment_agent:
+            type: keyword
+          age_at_treatment_start:
+            type: integer
+          age_at_treatment_end:
+            type: integer
+      # treatment response filters
+      treatment_response_filters:
         type: nested
         properties:
           age_at_response:
@@ -400,212 +388,11 @@ Indices:
             type: keyword
           response_system:
             type: keyword
-          treatment_response_id:
-            type: keyword
-    type: neo4j
-    cypher_query: >
-      MATCH (ga:genetic_analysis)-[:of_genetic_analysis]->(p:participant),
-        (cg:consent_group)<-[:of_participant]-(p),
-        (stu:study)<-[:of_consent_group]-(cg)
-      OPTIONAL MATCH (d:diagnosis)-[:of_diagnosis]->(p)
-      OPTIONAL MATCH (sur:survival)-[:of_survival]->(p)
-      OPTIONAL MATCH (t:treatment)-[:of_treatment]->(p)
-      OPTIONAL MATCH (tresp:treatment_response)-[:of_treatment_response]->(p)
-      WITH
-        *,
-        CASE
-          WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
-            [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
-              CASE 
-                WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
-                THEN 'Not Reported' 
-                ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
-              END
-            ]
-          ELSE
-            [CASE 
-              WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
-              THEN 'Not Reported' 
-              ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
-            END]
-        END AS gene_symbol_arr
-      WITH
-        // Study fields
-        stu.dbgap_accession AS dbgap_accession,
-        stu.study_id AS study_id,
-        stu.study_name AS study_name,
-
-        // Participant fields
-        p.id AS participant_pk,
-        {
-          id: p.id,
-          participant_id: p.participant_id,
-          race: apoc.text.split(p.race, ';'),
-          sex_at_birth: p.sex_at_birth
-        } AS participant,
-
-        // Genetic Analysis fields
-        ga.id AS id,
-        ga.genetic_analysis_id AS genetic_analysis_id,
-        ga.alteration AS alteration,
-        ga.cytoband AS cytoband,
-        apoc.coll.toSet(gene_symbol_arr) AS gene_symbol,
-        apoc.text.join(apoc.coll.toSet(gene_symbol_arr), ';') AS gene_symbol_str,
-        ga.genomic_source_category AS genomic_source_category,
-        ga.hgvs_coding AS hgvs_coding,
-        ga.hgvs_genome AS hgvs_genome,
-        ga.hgvs_protein AS hgvs_protein,
-        ga.reported_significance AS reported_significance,
-        ga.reported_significance_system AS reported_significance_system,
-        ga.status AS status,
-        ga.test AS test,
-
-        // Additional Genetic Analysis fields for download
-        ga.alteration_effect AS alteration_effect,
-        ga.alteration_type AS alteration_type,
-        ga.chromosome AS chromosome,
-        ga.exon AS exon,
-        ga.fusion_partner_exon AS fusion_partner_exon,
-        ga.fusion_partner_gene AS fusion_partner_gene,
-        ga.reference_genome AS reference_genome,
-
-        // Diagnosis records
-        (CASE
-          WHEN COUNT(DISTINCT d) > 0 THEN COLLECT(DISTINCT {
-            age_at_diagnosis: d.age_at_diagnosis,
-            anatomic_site: d.anatomic_site,
-            diagnosis_basis: apoc.text.split(d.diagnosis_basis, ';'),
-            diagnosis: d.diagnosis,
-            diagnosis_classification_system: apoc.text.split(d.diagnosis_classification_system, ';'),
-            disease_phase: d.disease_phase
-          })
-          ELSE []
-        END) AS diagnoses,
-
-        // Survival records
-        (CASE
-          WHEN COUNT(DISTINCT sur) > 0 THEN COLLECT(DISTINCT {
-            age_at_last_known_survival_status: sur.age_at_last_known_survival_status,
-            cause_of_death: sur.cause_of_death,
-            first_event: sur.first_event,
-            last_known_survival_status: sur.last_known_survival_status
-          })
-          ELSE []
-        END) AS survivals,
-
-        // Treatment records
-        (CASE
-          WHEN COUNT(DISTINCT t) > 0 THEN COLLECT(DISTINCT {
-            age_at_treatment_end: t.age_at_treatment_end,
-            age_at_treatment_start: t.age_at_treatment_start,
-            treatment_agent: apoc.text.split(t.treatment_agent, ';'),
-            treatment_id: t.treatment_id,
-            treatment_type: t.treatment_type
-          })
-          ELSE []
-        END) AS treatments,
-
-        // Treatment Response records
-        (CASE
-          WHEN COUNT(DISTINCT tresp) > 0 THEN COLLECT(DISTINCT {
-            age_at_response: tresp.age_at_response,
-            response: tresp.response,
-            response_category: tresp.response_category,
-            response_system: tresp.response_system,
-            treatment_response_id: tresp.treatment_response_id
-          })
-          ELSE []
-        END) AS treatment_responses
-      RETURN
-        // Study fields
-        dbgap_accession,
-        study_id,
-        study_name,
-
-        // Participant fields
-        participant_pk,
-        participant,
-
-        // Genetic Analysis fields
-        id,
-        genetic_analysis_id,
-        alteration,
-        cytoband,
-        gene_symbol,
-        gene_symbol_str,
-        genomic_source_category,
-        hgvs_coding,
-        hgvs_genome,
-        hgvs_protein,
-        reported_significance,
-        reported_significance_system,
-        status,
-        test,
-
-        // Additional Genetic Analysis fields for download
-        alteration_effect,
-        alteration_type,
-        chromosome,
-        exon,
-        fusion_partner_exon,
-        fusion_partner_gene,
-        reference_genome,
-
-        // Diagnosis fields
-        diagnoses,
-
-        // Survival fields
-        survivals,
-
-        // Treatment fields
-        treatments,
-
-        // Treatment Response fields
-        treatment_responses;
-
-  - index_name: study_participants
-    type: neo4j
-    mapping:
-      id:
-        type: keyword
-      pid:
-        type: keyword
-      participant_id:
-        type: keyword
-      race:
-        type: keyword
-      sex_at_birth:
-        type: keyword
-      survival_filters:
+      # Sample+Diagnosis+Genetic Analysis+File filters
+      sample_diagnosis_genetic_analysis_file_filters:
         type: nested
         properties:
-          last_known_survival_status:
-            type: keyword
-          age_at_last_known_survival_status:
-            type: integer
-          event_free_survival_status:
-            type: keyword
-          first_event:
-            type: keyword
-      treatment_filters:
-        type: nested
-        properties:
-          treatment_type:
-            type: keyword
-          treatment_agent:
-            type: keyword
-          age_at_treatment_start:
-            type: integer
-      treatment_response_filters:
-        type: nested
-        properties:
-          response_category:
-            type: keyword
-          age_at_response:
-            type: integer
-      sample_diagnosis_file_filters:
-        type: nested
-        properties:
+          # Sample facets
           sample_anatomic_site:
             type: keyword
           participant_age_at_collection:
@@ -614,24 +401,37 @@ Indices:
             type: keyword
           tumor_classification:
             type: keyword
-          age_at_diagnosis:
-            type: integer
-          diagnosis_anatomic_site:
-            type: keyword
-          disease_phase:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword            
+          # Diagnosis facets
           diagnosis:
             type: keyword
           diagnosis_category:
             type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword          
+          disease_phase:
+            type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
           data_category:
             type: keyword
           file_type:
@@ -646,16 +446,6 @@ Indices:
             type: keyword
           library_strategy:
             type: keyword
-      study_id:
-        type: keyword
-      dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      study_acronym:
-        type: keyword
-      study_name:
-        type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
       - query: |
@@ -1082,10 +872,85 @@ Indices:
           st.study_acronym AS study_acronym,
           st.study_name AS study_name
 
+  # TODO: Joon to revisit this index based on CCDI model 3.1.0 for now, later on, we will pump up to use CCDI-DCC 1.0.0
+  # Data points for KM plot
+  # Excludes survival records with bad age_at_last_known_survival_status
+  # Excludes survival records associated with bad age_at_diagnosis
+  - index_name: km_plot_data
+    type: neo4j
+    mapping:
+      id: # Participant primary key
+        type: keyword
+      time: # Difference between participant's highest age_at_diagnosis and highest age_at_last_known_survival_status
+        type: integer
+      event: # 1 if participant is dead, and 0 if participant is alive
+        type: integer
+    cypher_query: >
+      MATCH (p:participant)
+      OPTIONAL MATCH (p)<-[:of_diagnosis]-(d:diagnosis)
+      OPTIONAL MATCH (p)<-[:of_survival]-(sur:survival)
+      WITH p, COLLECT(d) AS diagnoses, COLLECT(sur) AS survivals
+
+      WITH
+        p,
+        diagnoses,
+        survivals,
+        [diagnosis IN diagnoses
+          WHERE diagnosis.age_at_diagnosis IS NOT NULL |
+          diagnosis.age_at_diagnosis] AS diag_ages,
+        [survival IN survivals
+          WHERE survival.age_at_last_known_survival_status IS NOT NULL |
+          survival.age_at_last_known_survival_status] AS surv_ages
+
+      WHERE
+        NOT ANY(a IN diag_ages WHERE a = -999) AND
+        NOT ANY(a IN surv_ages WHERE a = -999) AND
+        SIZE(diag_ages) > 0 AND
+        SIZE(surv_ages) > 0
+
+      WITH
+        p,
+        diagnoses,
+        survivals,
+        REDUCE(
+          m = NULL,
+          a IN diag_ages |
+            CASE
+              WHEN m IS NULL OR a < m THEN a
+              ELSE m
+            END
+        ) AS min_diag_age,
+        REDUCE(
+          m = null,
+          a IN surv_ages |
+            CASE
+              WHEN m IS NULL OR a > m THEN a
+              ELSE m
+            END
+        ) AS max_surv_age
+
+      WHERE min_diag_age <= max_surv_age
+
+      WITH
+        p,
+        min_diag_age,
+        max_surv_age,
+        [survival IN survivals
+          WHERE survival.age_at_last_known_survival_status = max_surv_age] AS max_survs
+
+      RETURN
+        p.id AS id,
+        max_surv_age - min_diag_age AS time,
+        CASE
+          WHEN ANY(surv IN max_survs WHERE surv.last_known_survival_status = "Dead") THEN 1
+          ELSE 0
+        END AS event;
+
+  #TODO: added genetic_analysis related fields to "sample_diagnosis_genetic_analysis_file_filters"
   - index_name: participants
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a participant_pk
         type: keyword
       participant_id:
         type: keyword
@@ -1096,67 +961,18 @@ Indices:
         type: keyword
       sex_at_birth:
         type: keyword
-      alternate_participant_id:
+      # Study fields
+      study_id:
         type: keyword
-      cpi_data:
-        type: nested
-        properties:
-          associated_id:
-            type: keyword
-          repository_of_synonym_id:
-            type: keyword
-          domain_description:
-            type: keyword
-          domain_category:
-            type: keyword
-          data_location:
-            type: keyword
-          data_type:
-            type: keyword
-          p_id:
-            type: keyword
-      diagnosis_str:
+      dbgap_accession:
         type: keyword
-      diagnosis_category_str:
+      study_status:
         type: keyword
-      diagnosis_comment_str:
+      study_acronym:
         type: keyword
-      diagnosis_anatomic_site_str:
+      study_name:
         type: keyword
-      age_at_diagnosis_str:
-        type: keyword
-      treatment_agent_str:
-        type: keyword
-      treatment_type_str:
-        type: keyword
-      age_at_treatment_start_str:
-        type: keyword
-      first_event_str:
-        type: keyword
-      last_known_survival_status_str:
-        type: keyword
-      age_at_last_known_survival_status_str:
-        type: keyword
-      participant_id_gs:
-        type: search_as_you_type
-      diagnosis_str_gs:
-        type: search_as_you_type
-      diagnosis_category_str_gs:
-        type: search_as_you_type
-      study_id_gs:
-        type: search_as_you_type
-      age_at_diagnosis_str_gs:
-        type: search_as_you_type
-      treatment_type_str_gs:
-        type: search_as_you_type
-      sex_at_birth_gs:
-        type: search_as_you_type
-      treatment_agent_str_gs:
-        type: search_as_you_type
-      race_str_gs:
-        type: search_as_you_type
-      last_known_survival_status_str_gs:
-        type: search_as_you_type
+      # Survival filters
       survival_filters:
         type: nested
         properties:
@@ -1164,10 +980,11 @@ Indices:
             type: keyword
           age_at_last_known_survival_status:
             type: integer
-          event_free_survival_status:
+          cause_of_death:
             type: keyword
           first_event:
             type: keyword
+      # Treatment filters
       treatment_filters:
         type: nested
         properties:
@@ -1177,16 +994,25 @@ Indices:
             type: keyword
           age_at_treatment_start:
             type: integer
+          age_at_treatment_end:
+            type: integer
+      # Treatment response filters
       treatment_response_filters:
         type: nested
         properties:
-          response_category:
-            type: keyword
           age_at_response:
             type: integer
-      sample_diagnosis_file_filters:
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
+      # Sample+Diagnosis+Genetic Analysis+File filters
+      sample_diagnosis_genetic_analysis_file_filters:
         type: nested
         properties:
+          # Sample facets
           sample_anatomic_site:
             type: keyword
           participant_age_at_collection:
@@ -1195,24 +1021,37 @@ Indices:
             type: keyword
           tumor_classification:
             type: keyword
-          age_at_diagnosis:
-            type: integer
-          diagnosis_anatomic_site:
-            type: keyword
-          disease_phase:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword              
+          # Diagnosis facets
           diagnosis:
             type: keyword
           diagnosis_category:
             type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword          
+          disease_phase:
+            type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
           data_category:
             type: keyword
           file_type:
@@ -1227,16 +1066,6 @@ Indices:
             type: keyword
           library_strategy:
             type: keyword
-      study_id:
-        type: keyword
-      dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      study_acronym:
-        type: keyword
-      study_name:
-        type: keyword
       file_count:
         type: integer
       files:
@@ -1574,12 +1403,16 @@ Indices:
             COLLECT(DISTINCT file.dcf_indexd_guid) as files
         page_size: 1000
 
+  # TODO: added genetic_analysis related fields to "sample_diagnosis_genetic_analysis_file_filters"
   - index_name: survivals
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a survival primary key
         type: keyword
-      pid:
+      survival_id:
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
         type: keyword
       participant_id:
         type: keyword
@@ -1588,73 +1421,24 @@ Indices:
         type: keyword
       sex_at_birth:
         type: keyword
-      last_known_survival_status:
+      # Survival fields
+      age_at_event_free_survival_status:
+        type: integer
+      age_at_event_free_survival_status_str:
         type: keyword
       age_at_last_known_survival_status:
         type: integer
+      age_at_last_known_survival_status_str:
+        type: keyword
+      cause_of_death:
+        type: keyword
       event_free_survival_status:
         type: keyword
       first_event:
         type: keyword
-      treatment_filters:
-        type: nested
-        properties:
-          treatment_type:
-            type: keyword
-          treatment_agent:
-            type: keyword
-          age_at_treatment_start:
-            type: integer
-      treatment_response_filters:
-        type: nested
-        properties:
-          response_category:
-            type: keyword
-          age_at_response:
-            type: integer
-      sample_diagnosis_file_filters:
-        type: nested
-        properties:
-          sample_anatomic_site:
-            type: keyword
-          participant_age_at_collection:
-            type: integer
-          sample_tumor_status:
-            type: keyword
-          tumor_classification:
-            type: keyword
-          age_at_diagnosis:
-            type: integer
-          diagnosis_anatomic_site:
-            type: keyword
-          disease_phase:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword              
-          diagnosis:
-            type: keyword
-          diagnosis_category:
-            type: keyword
-          data_category:
-            type: keyword
-          file_type:
-            type: keyword
-          file_mapping_level:
-            type: keyword            
-          library_selection:
-            type: keyword
-          library_source_material:
-            type: keyword
-          library_source_molecule:
-            type: keyword
-          library_strategy:
-            type: keyword
+      last_known_survival_status:
+        type: keyword
+      # Study fields
       study_id:
         type: keyword
       dbgap_accession:
@@ -1665,6 +1449,88 @@ Indices:
         type: keyword
       study_name:
         type: keyword
+      # Treatment filters
+      treatment_filters:
+        type: nested
+        properties:
+          treatment_type:
+            type: keyword
+          treatment_agent:
+            type: keyword
+          age_at_treatment_start:
+            type: integer
+          age_at_treatment_end:
+            type: integer
+      # Treatment response filters
+      treatment_response_filters:
+        type: nested
+        properties:
+          age_at_response:
+            type: integer
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
+      # Sample+Diagnosis+Genetic Analysis+File filters
+      sample_diagnosis_genetic_analysis_file_filters:
+        type: nested
+        properties:
+          # Sample facets
+          sample_anatomic_site:
+            type: keyword
+          participant_age_at_collection:
+            type: integer
+          sample_tumor_status:
+            type: keyword
+          tumor_classification:
+            type: keyword
+          # Diagnosis facets
+          diagnosis:
+            type: keyword
+          diagnosis_category:
+            type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword          
+          disease_phase:
+            type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
+          data_category:
+            type: keyword
+          file_type:
+            type: keyword
+          file_mapping_level:
+            type: keyword
+          library_selection:
+            type: keyword
+          library_source_material:
+            type: keyword
+          library_source_molecule:
+            type: keyword
+          library_strategy:
+            type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
       - query: |
@@ -1948,9 +1814,12 @@ Indices:
   - index_name: treatments
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a treatment primary key
         type: keyword
-      pid:
+      treatment_id: 
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
         type: keyword
       participant_id:
         type: keyword
@@ -1959,6 +1828,33 @@ Indices:
         type: keyword
       sex_at_birth:
         type: keyword
+      # Study fields
+      study_id:
+        type: keyword
+      dbgap_accession:
+        type: keyword
+      study_status:
+        type: keyword
+      study_acronym:
+        type: keyword
+      study_name:
+        type: keyword
+      # Treatment fields
+      age_at_treatment_end:
+        type: integer
+      age_at_treatment_end_str:
+        type: keyword
+      age_at_treatment_start:
+        type: integer
+      age_at_treatment_start_str:
+        type: keyword
+      treatment_agent:
+        type: keyword
+      treatment_agent_str:
+        type: keyword
+      treatment_type:
+        type: keyword
+      # Survival filters
       survival_filters:
         type: nested
         properties:
@@ -1966,26 +1862,27 @@ Indices:
             type: keyword
           age_at_last_known_survival_status:
             type: integer
-          event_free_survival_status:
+          cause_of_death:
             type: keyword
           first_event:
             type: keyword
-      treatment_type:
-        type: keyword
-      treatment_agent:
-        type: keyword
-      age_at_treatment_start:
-        type: integer
+      # Treatment response filters
       treatment_response_filters:
         type: nested
         properties:
-          response_category:
-            type: keyword
           age_at_response:
             type: integer
-      sample_diagnosis_file_filters:
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
+      # Sample+Diagnosis+Genetic Analysis+File filters
+      sample_diagnosis_genetic_analysis_file_filters:
         type: nested
         properties:
+          # Sample facets
           sample_anatomic_site:
             type: keyword
           participant_age_at_collection:
@@ -1994,24 +1891,37 @@ Indices:
             type: keyword
           tumor_classification:
             type: keyword
-          age_at_diagnosis:
-            type: integer
-          diagnosis_anatomic_site:
-            type: keyword
-          disease_phase:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword              
+          # Diagnosis facets
           diagnosis:
             type: keyword
           diagnosis_category:
             type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword          
+          disease_phase:
+            type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
           data_category:
             type: keyword
           file_type:
@@ -2026,16 +1936,6 @@ Indices:
             type: keyword
           library_strategy:
             type: keyword
-      study_id:
-        type: keyword
-      dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      study_acronym:
-        type: keyword
-      study_name:
-        type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
       - query: |
@@ -2318,9 +2218,12 @@ Indices:
   - index_name: treatment_responses
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a treatment_response primary key
         type: keyword
-      pid:
+      treatment_response_id:
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
         type: keyword
       participant_id:
         type: keyword
@@ -2329,6 +2232,29 @@ Indices:
         type: keyword
       sex_at_birth:
         type: keyword
+      # Study fields
+      study_id:
+        type: keyword
+      dbgap_accession:
+        type: keyword
+      study_status:
+        type: keyword
+      study_acronym:
+        type: keyword
+      study_name:
+        type: keyword
+      # Treatment response fields
+      age_at_response:
+        type: integer
+      age_at_response_str:
+        type: keyword
+      response:
+        type: keyword
+      response_category:
+        type: keyword
+      response_system:
+        type: keyword
+      # Survival filters
       survival_filters:
         type: nested
         properties:
@@ -2336,10 +2262,11 @@ Indices:
             type: keyword
           age_at_last_known_survival_status:
             type: integer
-          event_free_survival_status:
+          cause_of_death:
             type: keyword
           first_event:
             type: keyword
+      # Treatment filters
       treatment_filters:
         type: nested
         properties:
@@ -2349,13 +2276,13 @@ Indices:
             type: keyword
           age_at_treatment_start:
             type: integer
-      response_category:
-        type: keyword
-      age_at_response:
-        type: integer
-      sample_diagnosis_file_filters:
+          age_at_treatment_end:
+            type: integer 
+      # Sample+Diagnosis+Genetic Analysis+File filters
+      sample_diagnosis_genetic_analysis_file_filters:
         type: nested
         properties:
+          # Sample facets
           sample_anatomic_site:
             type: keyword
           participant_age_at_collection:
@@ -2364,24 +2291,37 @@ Indices:
             type: keyword
           tumor_classification:
             type: keyword
-          age_at_diagnosis:
-            type: integer
-          diagnosis_anatomic_site:
-            type: keyword
-          disease_phase:
-            type: keyword
-          diagnosis_classification_system:
-            type: keyword
-          diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword              
+          # Diagnosis facets
           diagnosis:
             type: keyword
           diagnosis_category:
             type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword          
+          disease_phase:
+            type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
           data_category:
             type: keyword
           file_type:
@@ -2396,16 +2336,6 @@ Indices:
             type: keyword
           library_strategy:
             type: keyword
-      study_id:
-        type: keyword
-      dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      study_acronym:
-        type: keyword
-      study_name:
-        type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
       - query: |
@@ -2684,47 +2614,23 @@ Indices:
               st.study_acronym as study_acronym,
               st.study_name as study_name
 
-  - index_name: diagnosis
+  - index_name: diagnoses
     type: neo4j
     mapping:
-      id:
-        type: keyword
-      pid:
+      id: # a.k.a diagnosis primary key
         type: keyword
       diagnosis_id:
         type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
+        type: keyword
       participant_id:
         type: keyword
-      sid:
-        type: keyword
-      sample_id:
-        type: keyword
-      diagnosis:
-        type: keyword
-      diagnosis_category:
-        type: keyword
-      diagnosis_category_str:
-        type: keyword
-      disease_phase:
-        type: keyword
-      diagnosis_classification_system:
-        type: keyword
-      diagnosis_basis:
-        type: keyword
-      tumor_grade_source:
-        type: keyword  
-      tumor_stage_source:
-        type: keyword    
-      diagnosis_anatomic_site:
-        type: keyword
-      diagnosis_anatomic_site_str:
-        type: keyword
-      age_at_diagnosis:
-        type: integer
       race:
         type: keyword
       sex_at_birth:
         type: keyword
+      # Study fields
       dbgap_accession:
         type: keyword
       study_status:
@@ -2735,6 +2641,40 @@ Indices:
         type: keyword
       study_name:
         type: keyword
+      # diagnosis fields
+      diagnosis:
+        type: keyword
+      anatomic_site:
+        type: keyword
+      age_at_diagnosis:
+        type: integer
+      age_at_diagnosis_str:
+        type: keyword
+      diagnosis_classification_system: # for display
+        type: keyword
+      diagnosis_classification_system_str: # for sorting
+        type: keyword
+      diagnosis_basis: # for display
+        type: keyword
+      diagnosis_basis_str: # for sorting
+        type: keyword
+      diagnosis_comment:
+        type: keyword
+      disease_phase:
+        type: keyword
+      tumor_classification:
+        type: keyword
+      toronto_childhood_cancer_staging:
+        type: keyword
+      tumor_grade:
+        type: keyword
+      tumor_stage_clinical_m:
+        type: keyword
+      tumor_stage_clinical_n:
+        type: keyword
+      tumor_stage_clinical_t:
+        type: keyword
+      # Survival filters
       survival_filters:
         type: nested
         properties:
@@ -2742,10 +2682,11 @@ Indices:
             type: keyword
           age_at_last_known_survival_status:
             type: integer
-          event_free_survival_status:
+          cause_of_death:
             type: keyword
           first_event:
             type: keyword
+      # Treatment filters
       treatment_filters:
         type: nested
         properties:
@@ -2755,16 +2696,25 @@ Indices:
             type: keyword
           age_at_treatment_start:
             type: integer
+          age_at_treatment_end:
+            type: integer
+      # Treatment response filters
       treatment_response_filters:
         type: nested
         properties:
-          response_category:
-            type: keyword
           age_at_response:
             type: integer
-      sample_file_filters:
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
+      # Sample+Genetic Analysis+File filters
+      sample_genetic_analysis_file_filters:
         type: nested
         properties:
+          # Sample facets
           sample_anatomic_site:
             type: keyword
           participant_age_at_collection:
@@ -2773,6 +2723,22 @@ Indices:
             type: keyword
           tumor_classification:
             type: keyword
+          # Genetic Analysis facets
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+          # File facets
           data_category:
             type: keyword
           file_type:
@@ -2786,13 +2752,6 @@ Indices:
           library_source_molecule:
             type: keyword
           library_strategy:
-            type: keyword
-      file_count:
-        type: integer
-      files:
-        type: text
-        fields:
-          keyword:
             type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
@@ -3418,10 +3377,316 @@ Indices:
             COUNT(DISTINCT file.dcf_indexd_guid) as file_count,
             COLLECT(DISTINCT file.dcf_indexd_guid) as files
 
+  #TODO: newly added genetic analysis index for facet and table display purposes
+  - index_name: genetic_analyses
+    type: neo4j
+    mapping:
+      id: # a.k.a genetic_analysis primary key
+        type: keyword
+      genetic_analysis_id:
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
+        type: keyword
+      participant_id:
+        type: keyword
+      race:
+        type: keyword
+      sex_at_birth:
+        type: keyword
+      # Study fields
+      dbgap_accession:
+        type: keyword
+      study_status:
+        type: keyword
+      study_id:
+        type: keyword
+      study_acronym:
+        type: keyword
+      study_name:
+        type: keyword
+      # Genetic Analysis fields
+      gene_symbol: # for display
+        type: keyword
+      gene_symbol_str: # for sorting
+        type: keyword
+      status:
+        type: keyword
+      reported_significance:
+        type: keyword
+      reported_significance_system:
+        type: keyword
+      hgvs_genome:
+        type: keyword
+      alteration:
+        type: keyword
+      hgvs_coding:
+        type: keyword
+      hgvs_protein:
+        type: keyword
+      reference_genome:
+        type: keyword
+      chromosome:
+        type: keyword
+      cytoband:
+        type: keyword
+      exon:
+        type: keyword
+      fusion_partner_exon:
+        type: keyword
+      fusion_partner_gene:
+        type: keyword
+      alteration_type:
+        type: keyword
+      alteration_effect:
+        type: keyword
+      genomic_source_category:
+        type: keyword
+      test:
+        type: keyword
+      # Survival records
+      survival_filters:
+        type: nested
+        properties:
+          last_known_survival_status:
+            type: keyword
+          age_at_last_known_survival_status:
+            type: integer
+          cause_of_death:
+            type: keyword
+          first_event:
+            type: keyword
+      # Treatment filters
+      treatment_filters:
+        type: nested
+        properties:
+          treatment_type:
+            type: keyword
+          treatment_agent:
+            type: keyword
+          age_at_treatment_start:
+            type: integer
+          age_at_treatment_end:
+            type: integer
+      # Treatment response filters
+      treatment_response_filters:
+        type: nested
+        properties:
+          age_at_response:
+            type: integer
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
+      # Sample+Diagnosis+File filters
+      sample_diagnosis_file_filters:
+        type: nested
+        properties:
+          # Sample facets
+          sample_anatomic_site:
+            type: keyword
+          participant_age_at_collection:
+            type: integer
+          sample_tumor_status:
+            type: keyword
+          tumor_classification:
+            type: keyword
+          # Diagnosis facets
+          diagnosis:
+            type: keyword
+          diagnosis_category:
+            type: keyword
+          diagnosis_anatomic_site:
+            type: keyword
+          age_at_diagnosis:
+            type: integer
+          diagnosis_classification_system:
+            type: keyword
+          diagnosis_basis:
+            type: keyword
+          disease_phase:
+            type: keyword
+          # File facets
+          data_category:
+            type: keyword
+          file_type:
+            type: keyword
+          file_mapping_level:
+            type: keyword
+          library_selection:
+            type: keyword
+          library_source_material:
+            type: keyword
+          library_source_molecule:
+            type: keyword
+          library_strategy:
+            type: keyword
+    cypher_query: >
+      MATCH (ga:genetic_analysis)-[:of_genetic_analysis]->(p:participant),
+        (cg:consent_group)<-[:of_participant]-(p),
+        (stu:study)<-[:of_consent_group]-(cg)
+      OPTIONAL MATCH (d:diagnosis)-[:of_diagnosis]->(p)
+      OPTIONAL MATCH (sur:survival)-[:of_survival]->(p)
+      OPTIONAL MATCH (t:treatment)-[:of_treatment]->(p)
+      OPTIONAL MATCH (tresp:treatment_response)-[:of_treatment_response]->(p)
+      WITH
+        *,
+        CASE
+          WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+            [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+              CASE 
+                WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                THEN 'Not Reported' 
+                ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+              END
+            ]
+          ELSE
+            [CASE 
+              WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+              THEN 'Not Reported' 
+              ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+            END]
+        END AS gene_symbol_arr
+      WITH
+        // Study fields
+        stu.dbgap_accession AS dbgap_accession,
+        stu.study_id AS study_id,
+        stu.study_name AS study_name,
+
+        // Participant fields
+        p.id AS participant_pk,
+        {
+          id: p.id,
+          participant_id: p.participant_id,
+          race: apoc.text.split(p.race, ';'),
+          sex_at_birth: p.sex_at_birth
+        } AS participant,
+
+        // Genetic Analysis fields
+        ga.id AS id,
+        ga.genetic_analysis_id AS genetic_analysis_id,
+        ga.alteration AS alteration,
+        ga.cytoband AS cytoband,
+        apoc.coll.toSet(gene_symbol_arr) AS gene_symbol,
+        apoc.text.join(apoc.coll.toSet(gene_symbol_arr), ';') AS gene_symbol_str,
+        ga.genomic_source_category AS genomic_source_category,
+        ga.hgvs_coding AS hgvs_coding,
+        ga.hgvs_genome AS hgvs_genome,
+        ga.hgvs_protein AS hgvs_protein,
+        ga.reported_significance AS reported_significance,
+        ga.reported_significance_system AS reported_significance_system,
+        ga.status AS status,
+        ga.test AS test,
+
+        // Additional Genetic Analysis fields for download
+        ga.alteration_effect AS alteration_effect,
+        ga.alteration_type AS alteration_type,
+        ga.chromosome AS chromosome,
+        ga.exon AS exon,
+        ga.fusion_partner_exon AS fusion_partner_exon,
+        ga.fusion_partner_gene AS fusion_partner_gene,
+        ga.reference_genome AS reference_genome,
+
+        // Diagnosis records
+        (CASE
+          WHEN COUNT(DISTINCT d) > 0 THEN COLLECT(DISTINCT {
+            age_at_diagnosis: d.age_at_diagnosis,
+            anatomic_site: d.anatomic_site,
+            diagnosis_basis: apoc.text.split(d.diagnosis_basis, ';'),
+            diagnosis: d.diagnosis,
+            diagnosis_classification_system: apoc.text.split(d.diagnosis_classification_system, ';'),
+            disease_phase: d.disease_phase
+          })
+          ELSE []
+        END) AS diagnoses,
+
+        // Survival records
+        (CASE
+          WHEN COUNT(DISTINCT sur) > 0 THEN COLLECT(DISTINCT {
+            age_at_last_known_survival_status: sur.age_at_last_known_survival_status,
+            cause_of_death: sur.cause_of_death,
+            first_event: sur.first_event,
+            last_known_survival_status: sur.last_known_survival_status
+          })
+          ELSE []
+        END) AS survivals,
+
+        // Treatment records
+        (CASE
+          WHEN COUNT(DISTINCT t) > 0 THEN COLLECT(DISTINCT {
+            age_at_treatment_end: t.age_at_treatment_end,
+            age_at_treatment_start: t.age_at_treatment_start,
+            treatment_agent: apoc.text.split(t.treatment_agent, ';'),
+            treatment_id: t.treatment_id,
+            treatment_type: t.treatment_type
+          })
+          ELSE []
+        END) AS treatments,
+
+        // Treatment Response records
+        (CASE
+          WHEN COUNT(DISTINCT tresp) > 0 THEN COLLECT(DISTINCT {
+            age_at_response: tresp.age_at_response,
+            response: tresp.response,
+            response_category: tresp.response_category,
+            response_system: tresp.response_system,
+            treatment_response_id: tresp.treatment_response_id
+          })
+          ELSE []
+        END) AS treatment_responses
+      RETURN
+        // Study fields
+        dbgap_accession,
+        study_id,
+        study_name,
+
+        // Participant fields
+        participant_pk,
+        participant,
+
+        // Genetic Analysis fields
+        id,
+        genetic_analysis_id,
+        alteration,
+        cytoband,
+        gene_symbol,
+        gene_symbol_str,
+        genomic_source_category,
+        hgvs_coding,
+        hgvs_genome,
+        hgvs_protein,
+        reported_significance,
+        reported_significance_system,
+        status,
+        test,
+
+        // Additional Genetic Analysis fields for download
+        alteration_effect,
+        alteration_type,
+        chromosome,
+        exon,
+        fusion_partner_exon,
+        fusion_partner_gene,
+        reference_genome,
+
+        // Diagnosis fields
+        diagnoses,
+
+        // Survival fields
+        survivals,
+
+        // Treatment fields
+        treatments,
+
+        // Treatment Response fields
+        treatment_responses;
+
   - index_name: studies
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a study primary key
         type: keyword
       study_id:
         type: keyword
@@ -3441,15 +3706,11 @@ Indices:
         type: keyword
       PIs:
         type: keyword
-      study_id_gs:
-        type: search_as_you_type
-      study_name_gs:
-        type: search_as_you_type
-      study_status_gs:
-        type: search_as_you_type
       num_of_participants:
         type: integer
-      num_of_diagnoses:
+      num_of_samples:
+        type: integer
+      num_of_files:
         type: integer
       diagnosis_cancer:
         type: text
@@ -3466,10 +3727,6 @@ Indices:
         fields:
           keyword:
             type: keyword
-      num_of_samples:
-        type: integer
-      num_of_files:
-        type: integer
       files:
         type: text
         fields:
@@ -3562,11 +3819,12 @@ Indices:
   - index_name: samples
     type: neo4j
     mapping:
-      id:
-        type: keyword
-      pid:
+      id: # a.k.a sample primary key
         type: keyword
       sample_id:
+        type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
         type: keyword
       participant_id:
         type: keyword
@@ -3574,16 +3832,7 @@ Indices:
         type: keyword
       sex_at_birth:
         type: keyword
-      sample_anatomic_site:
-        type: keyword
-      sample_anatomic_site_str:
-        type: keyword     
-      participant_age_at_collection:
-        type: integer
-      sample_tumor_status:
-        type: keyword
-      tumor_classification:
-        type: keyword
+      # Study fields
       study_id:
         type: keyword
       dbgap_accession:
@@ -3594,32 +3843,18 @@ Indices:
         type: keyword
       study_name:
         type: keyword
-      diagnosis_str:
+      # Sample fields
+      sample_anatomic_site:
         type: keyword
-      diagnosis_category_str:
+      sample_anatomic_site_str:
+        type: keyword     
+      participant_age_at_collection:
+        type: integer
+      sample_tumor_status:
         type: keyword
-      diagnosis_comment_str:
+      tumor_classification:
         type: keyword
-      diagnosis_anatomic_site_str:
-        type: keyword
-      age_at_diagnosis_str:
-        type: keyword
-      sample_id_gs:
-        type: search_as_you_type
-      participant_id_gs:
-        type: search_as_you_type
-      study_id_gs:
-        type: search_as_you_type
-      sample_anatomic_site_str_gs:
-        type: search_as_you_type
-      sample_tumor_status_gs:
-        type: search_as_you_type
-      diagnosis_str_gs:
-        type: search_as_you_type
-      diagnosis_category_str_gs:
-        type: search_as_you_type
-      tumor_classification_gs:
-        type: search_as_you_type
+      # Diagnosis filters
       diagnosis_filters:
         type: nested
         properties:
@@ -3632,15 +3867,30 @@ Indices:
           diagnosis_classification_system:
             type: keyword
           diagnosis_basis:
-            type: keyword
-          tumor_grade_source:
-            type: keyword  
-          tumor_stage_source:
-            type: keyword    
+            type: keyword   
           diagnosis:
             type: keyword
           diagnosis_category:
             type: keyword
+      # Genetic Analysis filters
+      genetic_analysis_filters:
+        type: nested
+        properties:
+          reported_significance:
+            type: keyword
+          reported_significance_system:
+            type: keyword
+          gene_symbol:
+            type: keyword
+          alteration:
+            type: keyword
+          fusion_partner_gene:
+            type: keyword
+          alteration_type:
+            type: keyword
+          status:
+            type: keyword
+      # File filters
       file_filters:
         type: nested
         properties:
@@ -3658,6 +3908,7 @@ Indices:
             type: keyword
           library_strategy:
             type: keyword
+      # Survival filters
       survival_filters:
         type: nested
         properties:
@@ -3665,10 +3916,11 @@ Indices:
             type: keyword
           age_at_last_known_survival_status:
             type: integer
-          event_free_survival_status:
+          cause_of_death:
             type: keyword
           first_event:
             type: keyword
+      # Treatment filters
       treatment_filters:
         type: nested
         properties:
@@ -3678,13 +3930,20 @@ Indices:
             type: keyword
           age_at_treatment_start:
             type: integer
+          age_at_treatment_end:
+            type: integer
+      # Treatment response filters
       treatment_response_filters:
         type: nested
         properties:
-          response_category:
-            type: keyword
           age_at_response:
             type: integer
+          response:
+            type: keyword
+          response_category:
+            type: keyword
+          response_system:
+            type: keyword
       file_count:
         type: integer
       direct_file_count:
@@ -3931,12 +4190,29 @@ Indices:
   - index_name: files
     type: neo4j
     mapping:
-      id:
-        type: keyword
-      pid:
+      id: # a.k.a file primary key use dcf_indexd_guid as unique identifier
         type: keyword
       file_id:
         type: keyword
+      # Participant fields
+      pid: # a.k.a participant_pk
+        type: keyword
+      participant_id:
+        type: keyword
+      sample_id:
+        type: keyword
+      # Study fields
+      study_id:
+        type: keyword
+      dbgap_accession:
+        type: keyword
+      study_status:
+        type: keyword
+      study_acronym:
+        type: keyword
+      study_name:
+        type: keyword
+      # File fields
       guid:
         type: keyword
       file_name:
@@ -3955,104 +4231,6 @@ Indices:
         type: long
       md5sum:
         type: keyword
-      study_id:
-        type: keyword
-      dbgap_accession:
-        type: keyword
-      study_status:
-        type: keyword
-      study_acronym:
-        type: keyword
-      study_name:
-        type: keyword
-      participant_id:
-        type: keyword
-      sample_id:
-        type: keyword
-      participant_id_gs:
-        type: search_as_you_type
-      sample_id_gs:
-        type: search_as_you_type
-      study_id_gs:
-        type: search_as_you_type
-      file_description_gs:
-        type: search_as_you_type
-      file_type_gs:
-        type: search_as_you_type
-      file_name_gs:
-        type: search_as_you_type
-      data_category_gs:
-        type: search_as_you_type
-      files:
-        type: text
-        fields:
-          keyword:
-            type: keyword
-      combined_filters:
-        type: nested
-        properties:
-          participant_id:
-            type: keyword
-          race:
-            type: keyword
-          sex_at_birth:
-            type: keyword
-          survival_filters:
-            type: nested
-            properties:
-              last_known_survival_status:
-                type: keyword
-              age_at_last_known_survival_status:
-                type: integer
-              event_free_survival_status:
-                type: keyword
-              first_event:
-                type: keyword
-          treatment_filters:
-            type: nested
-            properties:
-              treatment_type:
-                type: keyword
-              treatment_agent:
-                type: keyword
-              age_at_treatment_start:
-                type: integer
-          treatment_response_filters:
-            type: nested
-            properties:
-              response_category:
-                type: keyword
-              age_at_response:
-                type: integer
-          sample_diagnosis_filters:
-            type: nested
-            properties:
-              sample_anatomic_site:
-                type: keyword
-              participant_age_at_collection:
-                type: integer
-              sample_tumor_status:
-                type: keyword
-              tumor_classification:
-                type: keyword
-              age_at_diagnosis:
-                type: integer
-              diagnosis_anatomic_site:
-                type: keyword
-              disease_phase:
-                type: keyword
-              diagnosis_classification_system:
-                type: keyword
-              diagnosis_basis:
-                type: keyword
-              tumor_grade_source:
-                type: keyword  
-              tumor_stage_source:
-                type: keyword   
-              diagnosis:
-                type: keyword
-              diagnosis_category:
-                type: keyword
       library_selection:
         type: keyword
         fields:
@@ -4077,6 +4255,96 @@ Indices:
           sort:
             type: keyword
             normalizer: lowercase
+      files:
+        type: text
+        fields:
+          keyword:
+            type: keyword
+      combined_filters:
+        type: nested
+        properties:
+          participant_id:
+            type: keyword
+          race:
+            type: keyword
+          sex_at_birth:
+            type: keyword
+          survival_filters:
+            type: nested
+            properties:
+              last_known_survival_status:
+                type: keyword
+              age_at_last_known_survival_status:
+                type: integer
+              cause_of_death:
+                type: keyword
+              first_event:
+                type: keyword
+          treatment_filters:
+            type: nested
+            properties:
+              treatment_type:
+                type: keyword
+              treatment_agent:
+                type: keyword
+              age_at_treatment_start:
+                type: integer
+              age_at_treatment_end:
+                type: integer
+          treatment_response_filters:
+            type: nested
+            properties:
+              response:
+                type: keyword
+              response_category:
+                type: keyword
+              age_at_response:
+                type: integer
+              response_system:
+                type: keyword
+          # Sample+Diagnosis+Genetic Analysis filters
+          sample_diagnosis_genetic_analysis_filters:
+            type: nested
+            properties:
+              # Sample facets
+              sample_anatomic_site:
+                type: keyword
+              participant_age_at_collection:
+                type: integer
+              sample_tumor_status:
+                type: keyword
+              tumor_classification:
+                type: keyword
+              # Diagnosis facets
+              age_at_diagnosis:
+                type: integer
+              diagnosis_anatomic_site:
+                type: keyword
+              disease_phase:
+                type: keyword
+              diagnosis_classification_system:
+                type: keyword
+              diagnosis_basis:
+                type: keyword  
+              diagnosis:
+                type: keyword
+              diagnosis_category:
+                type: keyword
+              # Genetic Analysis facets
+              reported_significance:
+                type: keyword
+              reported_significance_system:
+                type: keyword
+              gene_symbol:
+                type: keyword
+              alteration:
+                type: keyword
+              fusion_partner_gene:
+                type: keyword
+              alteration_type:
+                type: keyword
+              status:
+                type: keyword
     # Cypher query will be used to retrieve data from Neo4j, and index into Elasticsearch
     cypher_queries:
       - query: |
