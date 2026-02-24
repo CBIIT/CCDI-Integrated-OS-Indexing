@@ -4,7 +4,7 @@ Indices:
   - index_name: cohorts
     type: neo4j
     mapping:
-      id:
+      id: # a.k.a participant primary key
         type: keyword
       participant_id:
         type: keyword
