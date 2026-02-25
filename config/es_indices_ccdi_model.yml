@@ -203,9 +203,10 @@ Indices:
     cypher_queries:
       - query: |
           MATCH (p:participant)-[:of_participant]->(cg:consent_group)-[:of_consent_group]->(stu:study)
-          WITH p, stu
+          WITH p, cg, stu
           SKIP $skip LIMIT $limit
           OPTIONAL MATCH (d:diagnosis)-[*..4]->(p)
+          OPTIONAL MATCH (ga:genetic_analysis)-[*..4]->(p)
           OPTIONAL MATCH (sur:survival)-[:of_survival]->(p)
           OPTIONAL MATCH (t:treatment)-[:of_treatment]->(p)
           OPTIONAL MATCH (tresp:treatment_response)-[:of_treatment_response]->(p)
@@ -217,9 +218,10 @@ Indices:
             p.participant_id AS participant_id,
             p.race AS race,
             p.sex_at_birth AS sex_at_birth,
+            cg.consent_group_name AS consent_group_name,
+            cg.consent_group_number AS consent_group_number,
+            stu.study_id AS study_id,
             stu.dbgap_accession AS dbgap_accession,
-            stu.study_status AS study_status,
-            apoc.text.join(COLLECT(distinct d.diagnosis), ';') AS diagnosis_str,
             (CASE
               WHEN COUNT(DISTINCT d) > 0 THEN COLLECT(DISTINCT {
                 id: d.id,
@@ -241,6 +243,31 @@ Indices:
               })
               ELSE []
             END) AS diagnoses,
+            (CASE
+              WHEN COUNT(DISTINCT ga) > 0 THEN COLLECT(DISTINCT {
+                id: ga.id,
+                genetic_analysis_id: ga.genetic_analysis_id,
+                alteration: ga.alteration,
+                alteration_effect: ga.alteration_effect,
+                alteration_type: ga.alteration_type,
+                chromosome: ga.chromosome,
+                cytoband: ga.cytoband,
+                exon: ga.exon,
+                fusion_partner_exon: ga.fusion_partner_exon,
+                fusion_partner_gene: ga.fusion_partner_gene,
+                gene_symbol: ga.gene_symbol,
+                genomic_source_category: ga.genomic_source_category,
+                hgvs_coding: ga.hgvs_coding,
+                hgvs_genome: ga.hgvs_genome,
+                hgvs_protein: ga.hgvs_protein,
+                reference_genome: ga.reference_genome,
+                reported_significance: ga.reported_significance,
+                reported_significance_system: ga.reported_significance_system,
+                status: ga.status,
+                test: ga.test
+              })
+              ELSE []
+            END) AS genetic_analyses,
             (CASE
               WHEN COUNT(DISTINCT sur) > 0 THEN COLLECT(DISTINCT {
                 id: sur.id,
