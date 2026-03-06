@@ -353,7 +353,7 @@ Indices:
         page_size: 100
 
   # participant centric index for study and other facets
-  - index_name: participants_faceted
+  - index_name: study_participants_faceted
     type: neo4j
     mapping:
       id:
