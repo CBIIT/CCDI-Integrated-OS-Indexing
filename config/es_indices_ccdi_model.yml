@@ -7361,7 +7361,7 @@ Indices:
             case when file: sequencing_file then file.library_strategy else null end AS library_strategy,
             [file_uid] as files,
             combined_filters as combined_filters
-        page_size: 100
+        page_size: 1000
       - query: |
           MATCH (st:study)<--(file)
           where (file: clinical_measure_file or file: generic_file)
