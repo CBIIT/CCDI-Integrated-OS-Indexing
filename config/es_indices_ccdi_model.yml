@@ -255,7 +255,22 @@ Indices:
                 exon: ga.exon,
                 fusion_partner_exon: ga.fusion_partner_exon,
                 fusion_partner_gene: ga.fusion_partner_gene,
-                gene_symbol: ga.gene_symbol,
+                gene_symbol: case when ga is not null then apoc.coll.toSet(CASE
+                                        WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+                                          [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+                                            CASE 
+                                              WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                              THEN 'Not Reported' 
+                                              ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                            END
+                                          ]
+                                        ELSE
+                                          [CASE 
+                                            WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                            THEN 'Not Reported' 
+                                            ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                          END]
+                                        END) else null end,
                 genomic_source_category: ga.genomic_source_category,
                 hgvs_coding: ga.hgvs_coding,
                 hgvs_genome: ga.hgvs_genome,
@@ -902,7 +917,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                    WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                      [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                        CASE 
+                                          WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                          THEN 'Not Reported' 
+                                          ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                        END
+                                      ]
+                                    ELSE
+                                      [CASE 
+                                        WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                      END]
+                                    END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -1111,7 +1141,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -1220,7 +1265,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -1329,7 +1389,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -1438,7 +1513,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -2117,7 +2207,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -2727,7 +2832,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -3344,7 +3464,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -3954,7 +4089,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -4381,7 +4531,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -4951,7 +5116,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -6395,7 +6575,22 @@ Indices:
           WITH sm, opensearch_data, CASE WHEN ga IS NOT NULL THEN COLLECT(DISTINCT {
             reported_significance: ga.reported_significance,
             reported_significance_system: ga.reported_significance_system,
-            gene_symbol: ga.gene_symbol,
+            gene_symbol: case when ga is not null then apoc.coll.toSet(CASE
+                                  WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: ga.alteration,
             fusion_partner_gene: ga.fusion_partner_gene,
             alteration_type: ga.alteration_type,
@@ -6406,7 +6601,22 @@ Indices:
             genetic_analysis_filters: apoc.coll.union(genetic_analysis_filter, CASE WHEN ga IS NOT NULL THEN COLLECT(DISTINCT{
               reported_significance: ga.reported_significance,
               reported_significance_system: ga.reported_significance_system,
-              gene_symbol: ga.gene_symbol,
+              gene_symbol: case when ga is not null then apoc.coll.toSet(CASE
+                                  WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
               alteration: ga.alteration,
               fusion_partner_gene: ga.fusion_partner_gene,
               alteration_type: ga.alteration_type,
@@ -6601,7 +6811,22 @@ Indices:
             COLLECT(DISTINCT {
               reported_significance: ga.reported_significance,
               reported_significance_system: ga.reported_significance_system,
-              gene_symbol: ga.gene_symbol,
+              gene_symbol: case when ga is not null then apoc.coll.toSet(CASE
+                                  WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
               alteration: ga.alteration,
               fusion_partner_gene: ga.fusion_partner_gene,
               alteration_type: ga.alteration_type,
@@ -6929,7 +7154,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -7276,7 +7516,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -7527,7 +7782,22 @@ Indices:
             // Genetic Analysis facets
             reported_significance: case when row.ga is not null then row.ga.reported_significance else null end,
             reported_significance_system: case when row.ga is not null then row.ga.reported_significance_system else null end,
-            gene_symbol: case when row.ga is not null then row.ga.gene_symbol else null end,
+            gene_symbol: case when row.ga is not null then apoc.coll.toSet(CASE
+                                  WHEN row.ga.gene_symbol STARTS WITH '[' AND row.ga.gene_symbol ENDS WITH ']' THEN
+                                    [x IN split(replace(substring(row.ga.gene_symbol, 1, size(row.ga.gene_symbol)-2), "'", ""), ",") | 
+                                      CASE 
+                                        WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                        THEN 'Not Reported' 
+                                        ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                      END
+                                    ]
+                                  ELSE
+                                    [CASE 
+                                      WHEN apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                      THEN 'Not Reported' 
+                                      ELSE apoc.text.replace(trim(row.ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                    END]
+                                END) else null end,
             alteration: case when row.ga is not null then row.ga.alteration else null end,
             fusion_partner_gene: case when row.ga is not null then row.ga.fusion_partner_gene else null end,
             alteration_type: case when row.ga is not null then row.ga.alteration_type else null end,
@@ -7576,7 +7846,22 @@ Indices:
                                         diagnosis_category: apoc.text.split(dg.diagnosis_category, ';'),
                                         reported_significance: ga.reported_significance,
                                         reported_significance_system: ga.reported_significance_system,
-                                        gene_symbol: ga.gene_symbol,
+                                        gene_symbol: case when ga is not null then apoc.coll.toSet(CASE
+                                                WHEN ga.gene_symbol STARTS WITH '[' AND ga.gene_symbol ENDS WITH ']' THEN
+                                                  [x IN split(replace(substring(ga.gene_symbol, 1, size(ga.gene_symbol)-2), "'", ""), ",") | 
+                                                    CASE 
+                                                      WHEN apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') = '' 
+                                                      THEN 'Not Reported' 
+                                                      ELSE apoc.text.replace(trim(x), '^[^A-Za-z0-9]+', '') 
+                                                    END
+                                                  ]
+                                                ELSE
+                                                  [CASE 
+                                                    WHEN apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') = '' 
+                                                    THEN 'Not Reported' 
+                                                    ELSE apoc.text.replace(trim(ga.gene_symbol), '^[^A-Za-z0-9]+', '') 
+                                                  END]
+                                              END) else null end,
                                         alteration: ga.alteration,
                                         fusion_partner_gene: ga.fusion_partner_gene,
                                         alteration_type: ga.alteration_type,
