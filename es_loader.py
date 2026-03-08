@@ -48,7 +48,7 @@ class ESLoader:
                 "settings": {
                     "number_of_shards": 1,
                     "index.max_result_window": 200000,
-                    "index.mapping.nested_objects.limit": 100000,
+                    "index.mapping.nested_objects.limit": 200000,
                     "index.max_terms_count": 200000
                 },
                 "mappings": {
