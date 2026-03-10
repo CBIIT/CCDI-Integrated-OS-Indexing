@@ -7281,7 +7281,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 5
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7294,7 +7294,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 6
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7307,7 +7307,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 7
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
@@ -7320,7 +7320,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 8
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7333,7 +7333,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 9
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7341,7 +7341,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 10
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
@@ -7354,7 +7354,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 11
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7367,7 +7367,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 12
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7380,7 +7380,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 13
           match (sm2:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
+          optional match (p:participant)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
@@ -7393,7 +7393,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 14
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7401,7 +7401,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 15
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7409,7 +7409,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 16
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (p)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
@@ -7422,7 +7422,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 17
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7430,7 +7430,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 18
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7438,7 +7438,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 19
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm1)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
@@ -7451,7 +7451,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 20
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (p)<--(ga:genetic_analysis)
@@ -7464,7 +7464,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 21
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (sm1)<--(ga:genetic_analysis)
@@ -7477,7 +7477,7 @@ Indices:
           with file, apoc.coll.union(sample_diagnosis_genetic_analysis_filter, sample_diagnosis_genetic_analysis_filter_1) as sample_diagnosis_genetic_analysis_filter
           // combination 22
           match (sm1:sample)<--(file)
-          optional match (p)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
+          optional match (p:participant)<-[:of_sample]-(sm1)<--(cl)<--(sm2:sample)
           where (cl: cell_line or cl: pdx)
           optional match (sm2)<--(dg:diagnosis)
           optional match (sm2)<--(ga:genetic_analysis)
