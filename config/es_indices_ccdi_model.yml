@@ -2187,6 +2187,264 @@ Indices:
               CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
             ) as sample_diagnosis_genetic_analysis_file_filter_1
           with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 36
+          optional match (st:study)<--(:consent_group)<--(p)<--(sm:sample)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (p)<--(ga:genetic_analysis)
+          optional match (p)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 37
+          optional match (st:study)<--(:consent_group)<--(p)<--(sm:sample)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm)<--(ga:genetic_analysis)
+          optional match (sm)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 38
+          optional match (st:study)<--(:consent_group)<--(p)<--(sm:sample)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (p)<--(ga:genetic_analysis)
+          optional match (sm)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 39
+          optional match (st:study)<--(:consent_group)<--(p)<--(sm:sample)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm)<--(ga:genetic_analysis)
+          optional match (p)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 40 (similar to combination 36, just need to group sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (p)<--(ga:genetic_analysis)
+          optional match (p)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 41 (similar to combination 38, just need to group sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (p)<--(ga:genetic_analysis)
+          optional match (sm1)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 42 (group both sm1 and sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (p)<--(ga:genetic_analysis)
+          optional match (sm2)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, sm1, sm2, file, dg, ga
+          with p, sample_diagnosis_genetic_analysis_file_filter,
+            apoc.coll.union(
+              CASE WHEN collect(sm1) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm1, file: file, dg: dg, ga: ga}) ELSE [] END,
+              CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
+            ) as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 43 (similar to combination 39, just need to group sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm1)<--(ga:genetic_analysis)
+          optional match (p)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 44 (similar to combination 37, just need to group sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm1)<--(ga:genetic_analysis)
+          optional match (sm1)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 45 (need to group both sm1 and sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm1)<--(ga:genetic_analysis)
+          optional match (sm2)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, sm1, sm2, file, dg, ga
+          with p, sample_diagnosis_genetic_analysis_file_filter,
+            apoc.coll.union(
+              CASE WHEN collect(sm1) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm1, file: file, dg: dg, ga: ga}) ELSE [] END,
+              CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
+            ) as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 46 (need to group both sm1 and sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm2)<--(ga:genetic_analysis)
+          optional match (p)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, sm1, sm2, file, dg, ga
+          with p, sample_diagnosis_genetic_analysis_file_filter,
+            apoc.coll.union(
+              CASE WHEN collect(sm1) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm1, file: file, dg: dg, ga: ga}) ELSE [] END,
+              CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
+            ) as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 47 (need to group both sm1 and sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm2)<--(ga:genetic_analysis)
+          optional match (sm1)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, sm1, sm2, file, dg, ga
+          with p, sample_diagnosis_genetic_analysis_file_filter,
+            apoc.coll.union(
+              CASE WHEN collect(sm1) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm1, file: file, dg: dg, ga: ga}) ELSE [] END,
+              CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
+            ) as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 48 (need to group both sm1 and sm2 with file, ga, and dg)
+          optional match (st:study)<--(:consent_group)<--(p)<-[:of_sample]-(sm1:sample)<--(cl)<--(sm2:sample)
+          WHERE (cl: cell_line or cl: pdx)
+          optional match (st)<--(file)
+          where (file:clinical_measure_file or file: generic_file)
+          optional match (sm2)<--(ga:genetic_analysis)
+          optional match (sm2)<--(dg:diagnosis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, sm1, sm2, file, dg, ga
+          with p, sample_diagnosis_genetic_analysis_file_filter,
+            apoc.coll.union(
+              CASE WHEN collect(sm1) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm1, file: file, dg: dg, ga: ga}) ELSE [] END,
+              CASE WHEN collect(sm2) <> [] OR collect(file) <> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm2, file: file, dg: dg, ga: ga}) ELSE [] END
+            ) as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 49
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (st)<--(file)
+          WHERE (file:clinical_measure_file or file: generic_file)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 50
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (st)<--(file)
+          WHERE (file:clinical_measure_file or file: generic_file)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 51
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (st)<--(file)
+          WHERE (file:clinical_measure_file or file: generic_file)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 52
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (st)<--(file)
+          WHERE (file:clinical_measure_file or file: generic_file)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 53
+          optional match (st:study)<--(:consent_group)<--(p)
+          optional match (p)<--(file)
+          WHERE (file: clinical_measure_file or file: generic_file or file: radiology_file)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 54
+          optional match (st:study)<--(:consent_group)<--(p)
+          optional match (p)<--(file)
+          WHERE (file: clinical_measure_file or file: generic_file or file: radiology_file)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 55
+          optional match (st:study)<--(:consent_group)<--(p)
+          optional match (p)<--(file)
+          WHERE (file: clinical_measure_file or file: generic_file or file: radiology_file)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 56
+          optional match (st:study)<--(:consent_group)<--(p)
+          optional match (p)<--(file)
+          WHERE (file: clinical_measure_file or file: generic_file or file: radiology_file)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 57
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (sm)<--(file)
+          WHERE (file: sequencing_file or file: generic_file OR file:pathology_file OR file:methylation_array_file OR file:cytogenomic_file)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> [] OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 58
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (sm)<--(file)
+          WHERE (file: sequencing_file or file: generic_file OR file:pathology_file OR file:methylation_array_file OR file:cytogenomic_file)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (sm)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 59
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (sm)<--(file)
+          WHERE (file: sequencing_file or file: generic_file OR file:pathology_file OR file:methylation_array_file OR file:cytogenomic_file)
+          OPTIONAL MATCH (sm)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
+          // combination 60
+          optional MATCH (st:study)<--(:consent_group)<--(p)
+          optional MATCH (st)<-[:of_cell_line|of_pdx]-(cl)<--(sm:sample)
+          WHERE (cl:cell_line OR cl:pdx)
+          optional MATCH (sm)<--(file)
+          WHERE (file: sequencing_file or file: generic_file OR file:pathology_file OR file:methylation_array_file OR file:cytogenomic_file)
+          OPTIONAL MATCH (p)<--(dg:diagnosis)
+          OPTIONAL MATCH (p)<--(ga:genetic_analysis)
+          with p, sample_diagnosis_genetic_analysis_file_filter, CASE WHEN collect(sm) <> [] OR collect(file)<> []  OR collect(ga) <> [] OR collect(dg) <> [] THEN collect(distinct {sm: sm, file: file, dg: dg, ga: ga}) ELSE [] END as sample_diagnosis_genetic_analysis_file_filter_1
+          with p, apoc.coll.union(sample_diagnosis_genetic_analysis_file_filter, sample_diagnosis_genetic_analysis_file_filter_1) as sample_diagnosis_genetic_analysis_file_filter
           with p, CASE WHEN size(sample_diagnosis_genetic_analysis_file_filter) > 0 THEN sample_diagnosis_genetic_analysis_file_filter ELSE [null] END as sample_diagnosis_genetic_analysis_file_filter
           unwind sample_diagnosis_genetic_analysis_file_filter as row
           with p, row
