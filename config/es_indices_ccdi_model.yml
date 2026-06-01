@@ -205,14 +205,15 @@ Indices:
           MATCH (p:participant)-[:of_participant]->(cg:consent_group)-[:of_consent_group]->(stu:study)
           WITH p
           SKIP $skip LIMIT $limit
-          OPTIONAL MATCH (d:diagnosis)-[*..4]->(p)
-          OPTIONAL MATCH (ga:genetic_analysis)-[*..4]->(p)
-          OPTIONAL MATCH (sur:survival)-[:of_survival]->(p)
-          OPTIONAL MATCH (t:treatment)-[:of_treatment]->(p)
-          OPTIONAL MATCH (tresp:treatment_response)-[:of_treatment_response]->(p)
-          OPTIONAL MATCH (s:sample)-[*..4]->(p)
-          OPTIONAL MATCH (file)-[*..4]->(p)
+          OPTIONAL MATCH (p)<-[*..4]-(d:diagnosis)
+          OPTIONAL MATCH (p)<-[*..4]-(ga:genetic_analysis)
+          OPTIONAL MATCH (p)<--(sur:survival)
+          OPTIONAL MATCH (p)<--(t:treatment)
+          OPTIONAL MATCH (p)<--(tresp:treatment_response)
+          OPTIONAL MATCH (p)<-[*..4]-(s:sample)
+          OPTIONAL MATCH (p)<-[*..4]-(file)
           where (file: clinical_measure_file or file: generic_file or file: radiology_file or file: sequencing_file or file: methylation_array_file or file: pathology_file or file: cytogenomic_file)
+          OPTIONAL MATCH (p)-->(cg:consent_group)-[:of_consent_group]->(stu:study)
           RETURN
             p.id AS id,
             p.participant_id AS participant_id,
@@ -6577,9 +6578,9 @@ Indices:
       - query: |
           MATCH (st:study)<-[:of_consent_group]-(cg:consent_group)<-[:of_participant]-(p:participant)
           with st, count(p) as num_p
-          MATCH (st:study)<-[*..6]-(dg:diagnosis)
+          MATCH (st)<-[*..6]-(dg:diagnosis)
           with st, num_p, count(distinct dg.diagnosis) as num_diag
-          MATCH (st:study)<-[*..6]-(dg:diagnosis)
+          MATCH (st)<-[*..6]-(dg:diagnosis)
           with st, num_p, num_diag, dg.diagnosis as dg_cancers, count(distinct dg.diagnosis) as num_cancers
           ORDER BY num_cancers desc
           with st, num_p, num_diag, collect(dg_cancers + ' (' + toString(num_cancers) + ')') as cancers
