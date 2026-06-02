@@ -7126,6 +7126,22 @@ Indices:
         type: keyword
       study_name:
         type: keyword
+      anatomic_site:
+        type: keyword
+      participant_age_at_collection:
+        type: keyword
+      sample_tumor_status:
+        type: keyword
+      tumor_spatial_extent:
+        type: keyword
+      sample_description:
+        type: keyword
+      percent_tumor:
+        type: integer
+      percent_necrosis:
+        type: integer
+      consent_codes:
+        type: keyword
       # File fields
       guid:
         type: keyword
@@ -7169,6 +7185,10 @@ Indices:
           sort:
             type: keyword
             normalizer: lowercase
+      fixation_embedding_method:
+        type: keyword
+      staining_method:
+        type: keyword
       files:
         type: text
         fields:
@@ -7483,6 +7503,14 @@ Indices:
             pids as pid,
             participant_ids AS participant_id,
             null AS sample_id,
+            null AS anatomic_site,
+            null AS participant_age_at_collection,
+            null AS sample_tumor_status,
+            null AS tumor_spatial_extent,
+            null AS sample_description,
+            null AS percent_tumor,
+            null AS percent_necrosis,
+            ["GRU"] AS consent_codes,
             st.study_id AS study_id,
             st.dbgap_accession as dbgap_accession,
             st.study_status AS study_status,
@@ -7497,6 +7525,8 @@ Indices:
             file.file_description AS file_description,
             file.file_size AS file_size,
             file.md5sum AS md5sum,
+            file.fixation_embedding_method AS fixation_embedding_method,
+            file.staining_method AS staining_method,
             null AS library_selection,
             null AS library_source_material,
             null AS library_source_molecule,
@@ -7851,6 +7881,7 @@ Indices:
           WITH file_uid, pids, participant_ids, [v IN sample_ids WHERE v IS NOT NULL] as sample_ids, combined_filters, head(collect(file)) AS file
           optional match (file)-[*..8]->(st:study)
           with file_uid, pids, participant_ids, [v IN sample_ids WHERE v IS NOT NULL] as sample_ids, combined_filters, file, st
+          with file_uid, pids, participant_ids, sample_ids, combined_filters, file, st
           RETURN DISTINCT
             file_uid as id,
             file_uid AS file_id,
@@ -7862,6 +7893,14 @@ Indices:
             st.study_status AS study_status,
             st.study_acronym as study_acronym,
             st.study_name as study_name,
+            ["GRU"] AS consent_codes,
+            ["fake_anatomic_site_1", "fake_anatomic_site_2"] AS anatomic_site,
+            ["fake_age", "-999"] AS participant_age_at_collection,
+            ["fake_status_1"] AS sample_tumor_status,
+            ["fake_extent_1", "fake_extent_2"] AS tumor_spatial_extent,
+            ["fake_description_1", "fake_description_2"] AS sample_description,
+            [] AS percent_tumor,
+            [] AS percent_necrosis,
             file.dcf_indexd_guid AS guid,
             file.file_name AS file_name,
             file.file_access AS file_access,
@@ -7875,6 +7914,8 @@ Indices:
             case when file: sequencing_file then file.library_source_material else null end AS library_source_material,
             case when file: sequencing_file then file.library_source_molecule else null end AS library_source_molecule,
             case when file: sequencing_file then file.library_strategy else null end AS library_strategy,
+            file.fixation_embedding_method AS fixation_embedding_method,
+            file.staining_method AS staining_method,
             [file_uid] as files,
             combined_filters as combined_filters
         page_size: 1000
@@ -8151,6 +8192,14 @@ Indices:
             st.study_status AS study_status,
             st.study_acronym as study_acronym,
             st.study_name as study_name,
+            null AS consent_codes,
+            null AS anatomic_site,
+            null AS participant_age_at_collection,
+            null AS sample_tumor_status,
+            null AS tumor_spatial_extent,
+            null AS sample_description,
+            null AS percent_tumor,
+            null AS percent_necrosis,
             file.dcf_indexd_guid AS guid,
             file.file_name AS file_name,
             file.file_access AS file_access,
@@ -8164,6 +8213,8 @@ Indices:
             null AS library_source_material,
             null AS library_source_molecule,
             null AS library_strategy,
+            file.fixation_embedding_method AS fixation_embedding_method,
+            file.staining_method AS staining_method,
             [file.dcf_indexd_guid] as files,
             combined_filter as combined_filters
         page_size: 10
